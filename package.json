@@ -1,0 +1,14 @@
+{
+  "name": "grammy-group-manager",
+  "version": "1.0.0",
+  "description": "A Telegram group management bot using grammY",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "YashKun",
+  "license": "MIT",
+  "dependencies": {
+    "grammy": "^1.24.1"
+  }
+}
