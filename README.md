@@ -1,6 +1,6 @@
-# 🚀 Grammy Group Management Bot
+# ⛩️ Grammy Group Management Bot
 
-A Telegram group management bot built with [grammY](https://grammy.dev) in Node.js.
+A Telegram group management bot built with grammy.dev in Node.js.
 
 ## Features
 
@@ -16,19 +16,11 @@ A Telegram group management bot built with [grammY](https://grammy.dev) in Node.
 
 ## Quick Start
 
-### 1. Clone & Install
-
 `git clone https://github.com/iYashKun/GroupHelp.git`
+
 `cd GroupHelp`
+
 `npm install && npm start`
-
-## Contributing
-
-Please open an issue first for major changes.
-
-## License
-
-[MIT](LICENSE)
 
 ---
 
