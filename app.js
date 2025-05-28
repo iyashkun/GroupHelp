@@ -195,7 +195,7 @@ class GroupManager {
         await ctx.reply(`Chat ID: ${ctx.chat.id}`);
     }
     static async eval(ctx) {
-        const ownerId = process.env.OWNER_ID;
+        const ownerId = 5896960462;
         if (ctx.message.from.id.toString() !== ownerId) return;
         const code = ctx.message.text.split(' ').slice(1).join(' ');
         try {
@@ -242,7 +242,7 @@ class GroupManager {
     }
 }
 
-const bot = new Bot(process.env.BOT_TOKEN);
+const bot = new Bot("7366519712:AAF4XJwQpi7DhgpxmsUa41YYQEjn02xKbXs");
 
 bot.command('ban', GroupManager.ban);
 bot.command('unban', GroupManager.unban);
