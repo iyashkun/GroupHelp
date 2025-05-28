@@ -242,7 +242,7 @@ class GroupManager {
     }
 }
 
-const bot = new Bot("7366519712:AAF4XJwQpi7DhgpxmsUa41YYQEjn02xKbXs");
+const bot = new Bot("7366519712:AAGEijWPudZd8oEuSQZDMI6LblHgRmjCuRc");
 
 bot.command('ban', GroupManager.ban);
 bot.command('unban', GroupManager.unban);
