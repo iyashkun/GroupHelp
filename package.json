@@ -9,6 +9,7 @@
   "author": "YashKun",
   "license": "MIT",
   "dependencies": {
-    "grammy": "^1.24.1"
+    "grammy": "^1.24.1",
+    "escape-html": "^1.0.3"
   }
 }
