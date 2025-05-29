@@ -159,7 +159,7 @@ class GroupManager {
     }
 
     static async welcome(ctx) {
-        const user = ctx.message.new_chat_members?.[0];
+        const user = ctx.message.new_chat_members && ctx.message.new_chat_members[0];
         if (user) await ctx.reply(`Welcome ${user.first_name}!`);
     }
 
