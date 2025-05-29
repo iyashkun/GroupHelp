@@ -152,7 +152,8 @@ class GroupManager {
     }
 
     static async adminmode(ctx) {
-        const arg = ctx.message.text.split(' ')[1]?.toLowerCase();
+        const args = ctx.message.text.split(' ');
+        const arg = args[1] ? args[1].toLowerCase() : undefined;
         GroupManager.adminOnly = arg === 'on';
         await ctx.reply(`Admin-only mode: ${GroupManager.adminOnly ? 'ON' : 'OFF'}`);
     }
