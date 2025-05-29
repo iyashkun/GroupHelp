@@ -7,7 +7,7 @@ class GroupManager {
     static adminOnly = false;
     static adminCache = {};
     static adminCacheBlock = {};
-    static SUPPORT_STAFF = ['5896960462']; // Replace with actual support staff IDs
+    static SUPPORT_STAFF = ['5896960462'];
     static BAN_GIFS = [
         'https://graph.org/file/02a1dcf7788186ffb36cb.mp4',
         'https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif',
@@ -611,4 +611,143 @@ class GroupManager {
 
     static async adminlist(ctx) {
         try {
-            const adminList = GroupManager.adminCache
+            const adminList = GroupManager.adminCache[ctx.chat.id] || (await GroupManager.reloadAdmins(ctx, 'adminlist'));
+            const userAdmins = adminList.filter(admin => !admin.isBot);
+            const botAdmins = adminList.filter(admin => admin.isBot);
+            let adminStr = `Admins in <b>${ctx.chat.title}</b>:\n\n<b>User Admins:</b>\n`;
+            adminStr += userAdmins.length ? userAdmins.map(admin => `- ${admin.name} (${admin.id})`).join('\n') : 'None';
+            adminStr += '\n\n<b>Bot Admins:</b>\n';
+            adminStr += botAdmins.length ? botAdmins.map(admin => `- ${admin.name} (${admin.id})`).join('\n') : 'None';
+            await ctx.reply(adminStr, { parse_mode: 'HTML' });
+        } catch (e) {
+            await ctx.reply(`Error fetching admins: ${e.message}`);
+        }
+    }
+
+    static async zombies(ctx) {
+        try {
+            const bot = await ctx.getChatMember(ctx.chat.id, ctx.me.id);
+            if (!bot.can_restrict_members) return ctx.reply('I don’t have permission to ban users.');
+            let zombieCount = 0;
+            let failedCount = 0;
+            const wait = await ctx.reply('Searching for deleted accounts...');
+            const members = await ctx.getChatMembers();
+            for (const member of members) {
+                if (member.user.is_deleted) {
+                    zombieCount++;
+                    try {
+                        await ctx.banChatMember(member.user.id);
+                    } catch (e) {
+                        if (e.message.includes('USER_ADMIN_INVALID')) failedCount++;
+                    }
+                }
+            }
+            await wait.delete();
+            if (zombieCount === 0) {
+                await ctx.reply('Group is clean!');
+            } else {
+                await ctx.reply(`${zombieCount} zombies found and ${zombieCount - failedCount} banned! ${failedCount} zombies are immune.`, {
+                    reply_markup: {
+                        inline_keyboard: [[{ text: 'Animation', url: 'https://graph.org/file/02a1dcf7788186ffb36cb.mp4' }]]
+                    }
+                });
+            }
+        } catch (e) {
+            await ctx.reply(`Error cleaning zombies: ${e.message}`);
+        }
+    }
+
+    static async admincache(ctx) {
+        const now = Date.now();
+        if (GroupManager.adminCacheBlock[ctx.chat.id] && now - GroupManager.adminCacheBlock[ctx.chat.id] < 600000) {
+            return ctx.reply('Can only reload admin cache once every 10 minutes.');
+        }
+        try {
+            await GroupManager.reloadAdmins(ctx, 'admincache');
+            GroupManager.adminCacheBlock[ctx.chat.id] = now;
+            await ctx.reply('Admin cache reloaded!');
+        } catch (e) {
+            await ctx.reply(`Error reloading admin cache: ${e.message}`);
+        }
+    }
+
+    static async invitelink(ctx) {
+        try {
+            const user = await ctx.getChatMember(ctx.chat.id, ctx.message.from.id);
+            if (!user.can_invite_users && user.status !== 'creator') return ctx.reply('You don’t have permission to generate invite links.');
+            const link = await ctx.exportChatInviteLink();
+            await ctx.reply(`Invite link for ${ctx.chat.title}: ${link}`, { disable_web_page_preview: true });
+        } catch (e) {
+            await ctx.reply(`Error generating invite link: ${e.message}`);
+        }
+    }
+
+    static async setgtitle(ctx) {
+        try {
+            const user = await ctx.getChatMember(ctx.chat.id, ctx.message.from.id);
+            if (!user.can_change_info && user.status !== 'creator') return ctx.reply('You don’t have permission to change the group title.');
+            const title = ctx.message.text.split(' ').slice(1).join(' ');
+            if (!title) return ctx.reply('Please provide a title.');
+            await ctx.setChatTitle(title);
+            await ctx.reply(`Group title changed to ${title}`);
+        } catch (e) {
+            await ctx.reply(`Error setting group title: ${e.message}`);
+        }
+    }
+
+    static async setgdes(ctx) {
+        try {
+            const user = await ctx.getChatMember(ctx.chat.id, ctx.message.from.id);
+            if (!user.can_change_info && user.status !== 'creator') return ctx.reply('You don’t have permission to change the group description.');
+            const description = ctx.message.text.split(' ').slice(1).join(' ');
+            if (!description) return ctx.reply('Please provide a description.');
+            await ctx.setChatDescription(description);
+            await ctx.reply(`Group description changed to ${description}`);
+        } catch (e) {
+            ctx.reply(`Error setting group description: ${e.message}`);
+        }
+    }
+
+    static async members(ctx) {
+        await ctx.reply('Telegram API does not allow fetching all members directly.');
+    }
+}
+
+const bot = new Bot("7366519712:AAGEijWPudZd8oEuSQZDMI6LblHgRmjCuRc");
+
+bot.command('tban', GroupManager.tban);
+bot.command('stban', GroupManager.stban);
+bot.command('dtban', GroupManager.dtban);
+bot.command('kick', GroupManager.kick);
+bot.command('skick', GroupManager.skick);
+bot.command('dkick', GroupManager.dkick);
+bot.command('ban', GroupManager.ban);
+bot.command('unban', GroupManager.unban);
+bot.command('mute', GroupManager.mute);
+bot.command('unmute', GroupManager.unmute);
+bot.command('warn', GroupManager.warn);
+bot.command('report', GroupManager.report);
+bot.command('pin', GroupManager.pin);
+bot.command('unpin', GroupManager.unpin);
+bot.command('rules', GroupManager.rules);
+bot.command('setrules', GroupManager.setrules);
+bot.command('showrules', GroupManager.showrules);
+bot.command('adminmode', GroupManager.adminmode);
+bot.command('id', GroupManager.id);
+bot.command('chatid', GroupManager.chatid);
+bot.command('eval', GroupManager.eval);
+bot.command('promote', GroupManager.promote);
+bot.command('fullpromote', GroupManager.fullpromote);
+bot.command('demote', GroupManager.demote);
+bot.command('adminlist', GroupManager.adminlist);
+bot.command('zombies', GroupManager.zombies);
+bot.command('admincache', GroupManager.admincache);
+bot.command('invitelink', GroupManager.invitelink);
+bot.command('setgtitle', GroupManager.setgtitle);
+bot.command('setgdes', GroupManager.setgdes);
+bot.command('members', GroupManager.members);
+bot.on('message:new_chat_members', GroupManager.welcome);
+bot.on('message', GroupManager.handleMessage);
+bot.on('callback_query', GroupManager.handleUnbanCallback);
+
+bot.start();
